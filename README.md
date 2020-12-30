@@ -1,6 +1,5 @@
-key-value Data Store
 
-##### File based Key-Value datastore
+###### File based Key-Value datastore
 
    Supports basic CRD (Create, Read, Delete)
 
