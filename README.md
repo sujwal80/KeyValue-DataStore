@@ -21,7 +21,7 @@ key_value = keyvalue.keyvalue()
 
 Note: If `File Path` is provided in the `keyvalue()` call, it will obtain lock on that file using `fcntl`. If object is created for the same file path twice, `BlockingIOError` is thrown.
 
-###### Creating an data
+###### Creating data
 ```
 
 key_value.Create('ujwal', 'singh')  #Here TimeToLive is By Default set to None 
