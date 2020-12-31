@@ -17,7 +17,6 @@
 import keyvalue
 key_value = keyvalue.keyvalue()
 ```
-
 Note: If `File Path` is provided in the `keyvalue()` call, it will obtain lock on that file using `fcntl`. If not then it will create file in current working directory. If object is created for the same file path twice, `BlockingIOError` is thrown.
 
 ###### Creating data
