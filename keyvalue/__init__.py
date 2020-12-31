@@ -1,9 +1,9 @@
 import os
 import datetime
 import json
-import ast
 from new_file_name import creating_file_name, time_eval
 import sys
+import fcntl
 
 class keyvalue:
     '''init initializes keyvalue modlue and create file if file path is not given
@@ -23,12 +23,21 @@ class keyvalue:
                 #creating unique file name in current working directory
                 file_dir = os.path.join(file_dir, creating_file_name())
 
-            #print(file_dir)
+            
             self.__file_dir = file_dir
             
             #creating file in current working directory if it is not available
-            os.open(self.__file_dir, os.O_CREAT)
+            self.__file_for_locking = os.open(self.__file_dir, os.O_CREAT | os.O_RDWR)
 
+            #acquiring lock on file if it is not acquiring otherwise it will create BlockingIOError
+            try:
+                fcntl.flock(self.__file_for_locking, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                
+            except Exception:
+                raise BlockingIOError('BlockingIOError: {} file is already in use'.format(self.__file_dir))
+
+            
+            
             #writing empty dictionary in file if its empty
             if os.path.getsize(self.__file_dir) == 0:
                 with open(self.__file_dir, 'w') as json_file:
@@ -50,7 +59,7 @@ class keyvalue:
         
         try:
             #if TimeToLive is not in integer format then KeyError is occured
-            if not str(TimeToLive).isnumeric():
+            if TimeToLive != None and not str(TimeToLive).isnumeric():
                 raise TypeError('KeyError:{} TimeToLive must be in int format'.format(TimeToLive))
 
             #if key is already in self.__kvalue then it will create keyerror for same
@@ -80,17 +89,18 @@ class keyvalue:
 
 
     def Read(self, key):
-
-        #time variable stores current time while reading the key
-        time = time_eval()
-
         try:
+
+            #time varaible stores current time while deleting it
+            time = time_eval()
+            
+            
             #if key not in the self.__kvalue then it will create KeyError 
             if str(key) not in self.__kvalue:
                 raise KeyError("KeyError: {}".format(key))
 
             #if TimeToLive if passed then it will create Exception
-            if time-self.__kvalue[str(key)][2] > self.__kvalue[str(key)][1]*(1e6):
+            if self.__kvalue[str(key)][1] != None and time-self.__kvalue[str(key)][2] > self.__kvalue[str(key)][1]*(1e6):
                 raise Exception("TimeToLiveError: {} exceed its Time To Live span thus Read and Delete operations are disabled".format(key))
 
             #if everthing is ok then it will return key and value in the form of json object
@@ -101,17 +111,18 @@ class keyvalue:
 
 
     def Delete(self, key):
-
-        #time varaible stores current time while deleting it
-        time = time_eval()
         
         try:
+
+            #time varaible stores current time while deleting it
+            time = time_eval()
+            
             #if key is not in self.__kvalue then it will return KeyError
             if str(key) not in self.__kvalue:
                 raise KeyError('KeyError: {}'.format(key))
 
             #if TimeToLive if passed then it will create Exception
-            if time-self.__kvalue[str(key)][2] > self.__kvalue[str(key)][1]*(1e6):
+            if self.__kvalue[str(key)][1] != None and time-self.__kvalue[str(key)][2] > int(self.__kvalue[str(key)][1])*(1e6):
                 raise Exception("TimeToLiveError: {} exceed its Time To Live span thus Read and Delete operations are disabled".format(key))
 
             #if everthing is ok then it will delete key from self.__kvalue
