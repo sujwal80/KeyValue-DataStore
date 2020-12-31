@@ -11,7 +11,7 @@
   5. Thread safe.
 
 
-**Usage : **
+**Usage:**
 
 ###### Creating an instance
 ```
